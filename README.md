@@ -85,55 +85,29 @@ ers/
 
 ## 🔥 Firebase Setup
 
-### Firestore Security Rules
+### Deploy Security Rules
 
-```javascript
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    // Users can read their own profile
-    match /users/{userId} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null && request.auth.uid == userId;
-    }
-    
-    // Anyone can read published items
-    match /items/{itemId} {
-      allow read: if resource.data.isPublished == true;
-      allow write: if request.auth != null && request.auth.uid == resource.data.hostId;
-    }
-    
-    // Bookings are private to involved parties
-    match /bookings/{bookingId} {
-      allow read: if request.auth != null && 
-        (request.auth.uid == resource.data.renterId || 
-         request.auth.uid == resource.data.hostId);
-      allow create: if request.auth != null;
-      allow update: if request.auth != null && 
-        (request.auth.uid == resource.data.renterId || 
-         request.auth.uid == resource.data.hostId);
-    }
-  }
-}
+After creating your Firebase project, deploy the security rules:
+
+```bash
+# Install Firebase CLI
+npm install -g firebase-tools
+
+# Login to Firebase
+firebase login
+
+# Initialize Firebase (select your project)
+firebase init
+
+# Deploy rules
+firebase deploy --only firestore:rules
+firebase deploy --only storage:rules
 ```
 
-### Storage Rules
-
-```javascript
-rules_version = '2';
-service firebase.storage {
-  match /b/{bucket}/o {
-    match /items/{itemId}/{fileName} {
-      allow read: if true;
-      allow write: if request.auth != null;
-    }
-    match /users/{userId}/{fileName} {
-      allow read: if true;
-      allow write: if request.auth != null && request.auth.uid == userId;
-    }
-  }
-}
-```
+The security rules are already configured in:
+- `firestore.rules` - Database access rules
+- `storage.rules` - File storage rules
+- `firestore.indexes.json` - Database indexes for optimal queries
 
 ## 🚀 Deployment
 

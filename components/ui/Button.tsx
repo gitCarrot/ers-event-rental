@@ -11,10 +11,12 @@ export interface ButtonProps extends HTMLMotionProps<"button"> {
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = 'primary', size = 'md', isLoading, children, ...props }, ref) => {
+    const baseStyles = 'inline-flex items-center justify-center rounded-base font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
+    
     const variants = {
-      primary: 'btn-primary',
-      secondary: 'btn-secondary',
-      outline: 'btn-outline',
+      primary: 'bg-accent text-white hover:bg-accent/90',
+      secondary: 'bg-hover text-primary hover:bg-gray-100',
+      outline: 'border border-primary bg-transparent text-primary hover:bg-hover',
     };
 
     const sizes = {
@@ -27,6 +29,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       <motion.button
         ref={ref}
         className={cn(
+          baseStyles,
           variants[variant],
           sizes[size],
           'relative',
