@@ -1,36 +1,176 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ERS - Event Rental System
 
-## Getting Started
+A modern event rental platform built with Next.js 15 and Firebase, allowing users to rent and share party supplies and event equipment.
 
-First, run the development server:
+## 🚀 Features
 
+- **User Authentication**: Email/password and Google sign-in
+- **Item Management**: List, edit, and manage rental items
+- **Search & Filter**: Find items by category, location, and price
+- **Booking System**: Request and manage rentals
+- **Reviews & Ratings**: Build trust through community feedback
+- **Secure Payments**: Integration with payment providers
+- **Real-time Updates**: Instant notifications for bookings
+
+## 🛠️ Tech Stack
+
+- **Frontend**: Next.js 15, React 19, TypeScript
+- **Styling**: Tailwind CSS, Framer Motion
+- **Backend**: Firebase (Authentication, Firestore, Storage)
+- **State Management**: Zustand, React Query
+- **Forms**: React Hook Form
+
+## 📋 Prerequisites
+
+- Node.js 18+ and npm
+- Firebase account
+- Git
+
+## 🔧 Installation
+
+1. Clone the repository:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/gitCarrot/ers-event-rental.git
+cd ers-event-rental
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install dependencies:
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Create a Firebase project:
+   - Go to [Firebase Console](https://console.firebase.google.com)
+   - Create a new project
+   - Enable Authentication (Email/Password and Google)
+   - Create a Firestore database
+   - Enable Storage
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. Set up environment variables:
+   - Copy `.env.local.example` to `.env.local`
+   - Add your Firebase configuration:
+```env
+NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_auth_domain
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_storage_bucket
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
+NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
+```
 
-## Learn More
+5. Run the development server:
+```bash
+npm run dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+Open [http://localhost:3000](http://localhost:3000) to see the app.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 📁 Project Structure
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+ers/
+├── app/                    # Next.js 15 app directory
+│   ├── (auth)/            # Authentication pages
+│   ├── items/             # Item browsing and management
+│   ├── profile/           # User profile pages
+│   └── layout.tsx         # Root layout
+├── components/            # Reusable UI components
+│   └── ui/               # Base UI components
+├── contexts/             # React contexts
+├── lib/                  # Utilities and configurations
+│   └── firebase/         # Firebase configuration
+├── types/                # TypeScript type definitions
+└── public/               # Static assets
+```
 
-## Deploy on Vercel
+## 🔥 Firebase Setup
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Firestore Security Rules
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```javascript
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Users can read their own profile
+    match /users/{userId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Anyone can read published items
+    match /items/{itemId} {
+      allow read: if resource.data.isPublished == true;
+      allow write: if request.auth != null && request.auth.uid == resource.data.hostId;
+    }
+    
+    // Bookings are private to involved parties
+    match /bookings/{bookingId} {
+      allow read: if request.auth != null && 
+        (request.auth.uid == resource.data.renterId || 
+         request.auth.uid == resource.data.hostId);
+      allow create: if request.auth != null;
+      allow update: if request.auth != null && 
+        (request.auth.uid == resource.data.renterId || 
+         request.auth.uid == resource.data.hostId);
+    }
+  }
+}
+```
+
+### Storage Rules
+
+```javascript
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /items/{itemId}/{fileName} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    match /users/{userId}/{fileName} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}
+```
+
+## 🚀 Deployment
+
+1. Build the application:
+```bash
+npm run build
+```
+
+2. Deploy to Firebase Hosting:
+```bash
+npm install -g firebase-tools
+firebase login
+firebase init hosting
+firebase deploy
+```
+
+## 📱 Features Roadmap
+
+- [ ] Mobile app (React Native)
+- [ ] Advanced search filters
+- [ ] Instant messaging
+- [ ] Payment processing integration
+- [ ] Host analytics dashboard
+- [ ] Multi-language support
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
+## 👨‍💻 Author
+
+Created with ❤️ by gitCarrot
+
+---
+
+**Note**: This is a demonstration project. For production use, ensure proper security measures, payment integration, and legal compliance.
